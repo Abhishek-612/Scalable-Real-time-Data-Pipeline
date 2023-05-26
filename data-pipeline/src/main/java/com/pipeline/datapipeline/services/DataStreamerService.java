@@ -1,5 +1,6 @@
 package com.pipeline.datapipeline.services;
 
+import com.pipeline.datapipeline.utils.Constants;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.logging.log4j.LogManager;
@@ -27,15 +28,21 @@ public class DataStreamerService {
         this.running = false;
     }
 
-    public void start() {
-        // Initialize necessary resources
-        // Connect to external systems, set up data sources, etc.
-        System.out.println(BOOTSTRAP_SERVERS);
+    public void kafkaInit() {
         Properties kafkaProps = new Properties();
         kafkaProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
         kafkaProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         kafkaProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         producer = new KafkaProducer<>(kafkaProps);
+
+        LOGGER.info("Kafka Connection Established!");
+    }
+
+    public void start() {
+        // Initialize necessary resources
+        // Connect to external systems, set up data sources, etc.
+        BOOTSTRAP_SERVERS = Constants.serverAddress;
+        kafkaInit();
 
         // Start receiving data
         running = true;
@@ -51,6 +58,8 @@ public class DataStreamerService {
     public void stop() {
         // Set running flag to false to stop the data receiving loop
         running = false;
+        producer.close();
+        LOGGER.info("Kafka Disconnected!");
     }
 
     public void storeData() {
@@ -71,7 +80,7 @@ public class DataStreamerService {
                         if (exception != null) {
                             exception.printStackTrace();
                         } else {
-                            System.out.println("Data sent successfully to Kafka. Topic: " + metadata.topic() +
+                            LOGGER.info("Data sent successfully to Kafka. Topic: " + metadata.topic() +
                                     ", Partition: " + metadata.partition() + ", Offset: " + metadata.offset());
                         }
                     }

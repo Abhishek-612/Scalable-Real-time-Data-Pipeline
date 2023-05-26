@@ -48,5 +48,7 @@ public class DataReceiverController {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        LOGGER.info("Data Receiver Terminated");
     }
 }

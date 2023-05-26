@@ -46,5 +46,7 @@ public class DataStreamController {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        LOGGER.info("Data Streamer Terminated");
     }
 }

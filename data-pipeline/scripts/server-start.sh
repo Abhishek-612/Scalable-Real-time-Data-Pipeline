@@ -3,13 +3,15 @@
 set -e
 
 
-LOG_DIR=/Users/abhishekrevadekar/Downloads/logs
+LOG_DIR=$(pwd)/scripts/logs
 SERVER_LOG_DIR=${LOG_DIR}/server_logs
 TMP_DIR=/tmp
 
+KAFKA_PATH=/opt/homebrew/Cellar/kafka/3.4.0
+
 CONFIG_FILE=servers_list.config
 SCRIPT_LOG=${LOG_DIR}/server_setup.log
-KAFKA_LOGS=/opt/homebrew/var/lib/kafka-logs
+KAFKA_LOGS=${LOG_DIR}/kafka-logs
 
 ZOOKEEPER_PROPS=/opt/homebrew/etc/kafka/zookeeper.properties
 

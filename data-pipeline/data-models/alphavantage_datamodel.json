@@ -1,0 +1,36 @@
+{
+  "name": "Alpha-Vantage",
+  "api": "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=IBM&interval=1min&apikey=QVHK8OOAVJ0TY00T",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "meta_data": {
+        "type": "object",
+        "properties": {
+          "information": { "type": "string" },
+          "symbol": { "type": "string" },
+          "last_refreshed": { "type": "string", "format": "date-time" },
+          "interval": { "type": "string" },
+          "output_size": { "type": "string" },
+          "time_zone": { "type": "string" }
+        },
+        "required": ["information", "symbol", "last_refreshed", "interval", "output_size", "time_zone"]
+      },
+      "time_series": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "properties": {
+            "open": { "type": "string" },
+            "high": { "type": "string" },
+            "low": { "type": "string" },
+            "close": { "type": "string" },
+            "volume": { "type": "string" }
+          },
+          "required": ["open", "high", "low", "close", "volume"]
+        }
+      }
+    },
+    "required": ["meta_data", "time_series"]
+  }
+}

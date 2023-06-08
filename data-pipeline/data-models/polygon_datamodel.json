@@ -1,0 +1,55 @@
+{
+  "name": "Polygon-IO",
+  "api": "https://api.polygon.io/v2/aggs/ticker/AAPL/range/1/day/2022-01-09/2023-01-09?apiKey=MEyaLaQQpHDCSp4ub_QHx6UseDlOnGqU",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "ticker": {
+        "type": "string"
+      },
+      "queryCount": {
+        "type": "integer"
+      },
+      "resultsCount": {
+        "type": "integer"
+      },
+      "adjusted": {
+        "type": "boolean"
+      },
+      "results": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "v": {
+              "type": "number"
+            },
+            "vw": {
+              "type": "number"
+            },
+            "o": {
+              "type": "number"
+            },
+            "c": {
+              "type": "number"
+            },
+            "h": {
+              "type": "number"
+            },
+            "l": {
+              "type": "number"
+            },
+            "t": {
+              "type": "integer"
+            },
+            "n": {
+              "type": "integer"
+            }
+          },
+          "required": ["v", "vw", "o", "c", "h", "l", "t", "n"]
+        }
+      }
+    },
+    "required": ["ticker", "queryCount", "resultsCount", "adjusted", "results"]
+  }
+}

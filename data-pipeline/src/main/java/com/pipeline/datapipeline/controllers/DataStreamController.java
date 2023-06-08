@@ -22,7 +22,7 @@ public class DataStreamController {
 
         // Start the data processing pipeline
         Thread streamThread = new Thread(() -> {
-            dataStreamService.start();
+//            dataStreamService.start();
         });
         streamThread.start();
 
@@ -31,7 +31,7 @@ public class DataStreamController {
         // Register shutdown hook to gracefully stop the application
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             // Stop the data processing pipeline
-            dataStreamService.stop();
+//            dataStreamService.stop();
 
             try {
                 streamThread.join();

@@ -1,94 +1,67 @@
 package com.pipeline.datapipeline.services;
 
-import com.pipeline.datapipeline.utils.Constants;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.pipeline.datapipeline.beans.DataModel;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.kafka.connect.json.JsonSerializer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
 @Service
 public class DataStreamerService {
 
-    private String TOPIC = "data-topic";
-    private boolean running;
+    private final Logger LOGGER = LogManager.getLogger();
+    private Producer<String, Object> producer = null;
 
     @Value("${kafka.bootstrap.servers}")
-    private String BOOTSTRAP_SERVERS;
+    private String bootstrapServers;
 
-    private static final Logger LOGGER = LogManager.getLogger();
-    Producer<String, String> producer = null;
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public DataStreamerService() {
-        this.running = false;
+
     }
 
-    public void kafkaInit() {
+    private Producer<String, Object> createKafkaProducer() {
         Properties kafkaProps = new Properties();
-        kafkaProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
+        kafkaProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         kafkaProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        kafkaProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        producer = new KafkaProducer<>(kafkaProps);
+        kafkaProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class.getName());
 
-        LOGGER.info("Kafka Connection Established!");
+        return new KafkaProducer<>(kafkaProps);
     }
 
-    public void start() {
-        // Initialize necessary resources
-        // Connect to external systems, set up data sources, etc.
-        BOOTSTRAP_SERVERS = Constants.serverAddress;
-        kafkaInit();
+    public void processData(DataModel dataModel, JsonNode data) {
+        LOGGER.debug(data);
 
-        // Start receiving data
-        running = true;
-        while (running) {
-            // Receive data from a data source
-            storeData();
+        ProducerRecord<String, Object> record = createProducerRecord(dataModel, data);
+        if (producer == null) {
+            producer = createKafkaProducer();
         }
-
-        // Clean up resources
-        // Disconnect from external systems, close connections, etc.
-    }
-
-    public void stop() {
-        // Set running flag to false to stop the data receiving loop
-        running = false;
-        producer.close();
-        LOGGER.info("Kafka Disconnected!");
-    }
-
-    public void storeData() {
-
-        try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            String line;
-
-
-            while ((line = reader.readLine()) != null) {
-                // Process the input line as needed
-                // You can modify this part to parse and format the data according to your requirements
-
-                ProducerRecord<String, String> record = new ProducerRecord<>(TOPIC, line);
-                producer.send(record, new Callback() {
-                    @Override
-                    public void onCompletion(RecordMetadata metadata, Exception exception) {
-                        if (exception != null) {
-                            exception.printStackTrace();
-                        } else {
-                            LOGGER.info("Data sent successfully to Kafka. Topic: " + metadata.topic() +
-                                    ", Partition: " + metadata.partition() + ", Offset: " + metadata.offset());
-                        }
-                    }
-                });
+        producer.send(record, new Callback() {
+            @Override
+            public void onCompletion(RecordMetadata metadata, Exception exception) {
+                if (exception != null) {
+                    exception.printStackTrace();
+                } else {
+                    LOGGER.info("Data sent successfully to Kafka. Topic: " + metadata.topic() +
+                            ", Partition: " + metadata.partition() + ", Offset: " + metadata.offset());
+                }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        });
     }
+
+    private ProducerRecord<String, Object> createProducerRecord(DataModel dataModel, JsonNode value) {
+        String key = LocalDateTime.now().format(formatter);
+        return new ProducerRecord<>(dataModel.getName(), key, value);
+    }
+
 
 }

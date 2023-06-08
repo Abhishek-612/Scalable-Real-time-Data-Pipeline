@@ -51,7 +51,7 @@ public class DataReceiverService {
     public void start() {
         // Initialize necessary resources
         // Connect to external systems, set up data sources, etc.
-        BOOTSTRAP_SERVERS = Constants.serverAddress;
+//        BOOTSTRAP_SERVERS = Constants.serverAddress;
         kafkaInit();
 
         // Start receiving data

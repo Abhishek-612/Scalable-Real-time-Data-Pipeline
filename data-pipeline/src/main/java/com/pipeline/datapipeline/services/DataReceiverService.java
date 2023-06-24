@@ -19,14 +19,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class DataReceiverService {
     private boolean running;
-    Consumer<String, String> consumer = null;
+    private Consumer<String, Object> consumer = null;
 
     @Value("${kafka.consumer.group-id}")
-    private String GROUP_ID;
+    private String KAFKA_CONSUMER_GROUP_ID;
     @Value("${kafka.bootstrap.servers}")
-    private String BOOTSTRAP_SERVERS;
+    private String KAFKA_BOOTSTRAP_SERVERS;
     @Value("${kafka.consumer.auto-offset-reset}")
-    private String AUTO_OFF_RESET;
+    private String KAFKA_CONSUMER_AUTO_OFF_RESET;
 
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -35,13 +35,13 @@ public class DataReceiverService {
         this.running = false;
     }
 
-    public void kafkaInit() {
+    private void kafkaInit() {
         Properties kafkaProps = new Properties();
-        kafkaProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
-        kafkaProps.put(ConsumerConfig.GROUP_ID_CONFIG, GROUP_ID);
+        kafkaProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_BOOTSTRAP_SERVERS);
+        kafkaProps.put(ConsumerConfig.GROUP_ID_CONFIG, KAFKA_CONSUMER_GROUP_ID);
         kafkaProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         kafkaProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        kafkaProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, AUTO_OFF_RESET);
+        kafkaProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, KAFKA_CONSUMER_AUTO_OFF_RESET);
 
         consumer = new KafkaConsumer<>(kafkaProps);
 
@@ -81,10 +81,10 @@ public class DataReceiverService {
         try {
             consumer.subscribe(Collections.singleton(TOPIC));
             while (true) {
-                ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(10));
-                for (ConsumerRecord<String, String> record : records) {
-                    String data = record.value();
-                    LOGGER.info("Received data: " + data);
+                ConsumerRecords<String, Object> records = consumer.poll(Duration.ofMillis(10));
+                for (ConsumerRecord<String, Object> record : records) {
+                    Object data = record.value();
+                    LOGGER.info("Received data: " + data.toString());
                 }
                 consumer.commitSync(); // Commit the offsets to mark the messages as processed
             }

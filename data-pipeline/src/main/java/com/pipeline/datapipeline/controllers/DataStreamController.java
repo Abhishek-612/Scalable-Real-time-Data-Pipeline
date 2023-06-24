@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DataStreamController {
-    private DataStreamerService dataStreamService;
+    private final DataStreamerService dataStreamService;
 
     @Autowired
     public DataStreamController(DataStreamerService dataStreamService) {

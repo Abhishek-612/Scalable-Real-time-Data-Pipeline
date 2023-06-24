@@ -23,16 +23,16 @@ public class DataModelLoader {
     private final Logger LOGGER = LogManager.getLogger();
 
     @Value("${data-models-directory}")
-    private String DATA_MODEL_DIRECTORY;
+    private String DATA_MODELS_DIRECTORY;
 
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     public DataModelLoader() {
         this.objectMapper = new ObjectMapper();
     }
 
     public List<DataModel> loadAndParseDataModels() {
-        File dataModelDirectory = new File(DATA_MODEL_DIRECTORY);
+        File dataModelDirectory = new File(DATA_MODELS_DIRECTORY);
         List<DataModel> listOfDataModels = new ArrayList<>();
 
         if (dataModelDirectory.exists() && dataModelDirectory.isDirectory()) {
@@ -57,10 +57,10 @@ public class DataModelLoader {
     }
 
     private DataModel parseDataModel(JsonNode dataModelNode) {
-        System.out.println(DATA_MODEL_DIRECTORY);
+        System.out.println(DATA_MODELS_DIRECTORY);
         // Extract base configuration
         String name = dataModelNode.get("name").asText();
-        System.out.println(DATA_MODEL_DIRECTORY);
+        System.out.println(DATA_MODELS_DIRECTORY);
         String api = dataModelNode.get("api").asText();
 
         // Extract schema information

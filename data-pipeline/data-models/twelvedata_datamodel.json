@@ -1,0 +1,8 @@
+{
+  "name": "Twelve-Data",
+  "api": "https://twelve-data1.p.rapidapi.com/time_series?symbol=AMZN&interval=1min&outputsize=30&format=json",
+  "fetch_interval": 10,
+  "restart_delay": 30,
+  "schema": {
+  }
+}

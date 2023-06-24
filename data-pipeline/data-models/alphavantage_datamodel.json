@@ -1,6 +1,8 @@
 {
   "name": "Alpha-Vantage",
   "api": "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=IBM&interval=1min&apikey=QVHK8OOAVJ0TY00T",
+  "fetch_interval": 10,
+  "restart_delay": 30,
   "schema": {
     "type": "object",
     "properties": {
@@ -31,6 +33,6 @@
         }
       }
     },
-    "required": ["meta_data", "time_series"]
+    "required": [ "time_series"]
   }
 }

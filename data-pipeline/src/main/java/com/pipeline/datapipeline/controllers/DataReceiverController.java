@@ -11,10 +11,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class DataReceiverController {
 
-    private DataReceiverService dataReceiverService;
+    private final DataReceiverService dataReceiverService;
 
     @Autowired
-    public DataReceiverController(DataStreamerService dataStreamService, DataReceiverService dataReceiverService) {
+    public DataReceiverController(DataReceiverService dataReceiverService) {
         this.dataReceiverService = dataReceiverService;
     }
 

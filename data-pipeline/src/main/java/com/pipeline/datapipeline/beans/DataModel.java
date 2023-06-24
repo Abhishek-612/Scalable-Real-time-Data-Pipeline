@@ -13,6 +13,35 @@ import java.util.Map;
 public class DataModel {
     private String name;
     private String api;
+    private int fetchInterval;
+
+    public DataModel(String name, String api, int fetchInterval, int restartDelay, JsonNode schema, Object dataModel) {
+        this.name = name;
+        this.api = api;
+        this.fetchInterval = fetchInterval;
+        this.restartDelay = restartDelay;
+        this.schema = schema;
+        this.dataModel = dataModel;
+    }
+
+    public int getFetchInterval() {
+        return fetchInterval;
+    }
+
+    public void setFetchInterval(int fetchInterval) {
+        this.fetchInterval = fetchInterval;
+    }
+
+    public int getRestartDelay() {
+        return restartDelay;
+    }
+
+    public void setRestartDelay(int restartDelay) {
+        this.restartDelay = restartDelay;
+    }
+
+    private int restartDelay;
+
     private JsonNode schema;
 
     private Object dataModel;

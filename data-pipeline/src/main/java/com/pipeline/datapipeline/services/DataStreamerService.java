@@ -21,9 +21,9 @@ public class DataStreamerService {
     private Producer<String, Object> producer = null;
 
     @Value("${kafka.bootstrap.servers}")
-    private String bootstrapServers;
+    private String KAFKA_BOOTSTRAP_SERVERS;
 
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public DataStreamerService() {
 
@@ -31,7 +31,7 @@ public class DataStreamerService {
 
     private Producer<String, Object> createKafkaProducer() {
         Properties kafkaProps = new Properties();
-        kafkaProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        kafkaProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_BOOTSTRAP_SERVERS);
         kafkaProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         kafkaProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class.getName());
 

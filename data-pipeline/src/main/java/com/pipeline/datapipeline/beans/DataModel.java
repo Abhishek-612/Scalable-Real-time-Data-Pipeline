@@ -2,6 +2,8 @@ package com.pipeline.datapipeline.beans;
 
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.kafka.common.header.Header;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -13,15 +15,32 @@ import java.util.Map;
 public class DataModel {
     private String name;
     private String api;
+    private HttpHeaders httpHeaders;
     private int fetchInterval;
+    private int restartDelay;
+    private JsonNode schema;
+    private Object dataModel;
 
-    public DataModel(String name, String api, int fetchInterval, int restartDelay, JsonNode schema, Object dataModel) {
+
+    public DataModel(String name, String api, HttpHeaders httpHeaders, int fetchInterval, int restartDelay, JsonNode schema) {
         this.name = name;
         this.api = api;
+        this.httpHeaders = httpHeaders;
         this.fetchInterval = fetchInterval;
         this.restartDelay = restartDelay;
         this.schema = schema;
-        this.dataModel = dataModel;
+        this.dataModel = extractSchemaInfo(this.schema);
+    }
+
+
+    // Getters and setters
+
+    public HttpHeaders getHttpHeaders() {
+        return httpHeaders;
+    }
+
+    public void setHttpHeaders(HttpHeaders httpHeaders) {
+        this.httpHeaders = httpHeaders;
     }
 
     public int getFetchInterval() {
@@ -40,18 +59,6 @@ public class DataModel {
         this.restartDelay = restartDelay;
     }
 
-    private int restartDelay;
-
-    private JsonNode schema;
-
-    private Object dataModel;
-
-    public DataModel(String name, String api, JsonNode schema) {
-        this.name = name;
-        this.api = api;
-        this.schema = schema;
-        this.dataModel = extractSchemaInfo(this.schema);
-    }
 
     private Object extractSchemaInfo(JsonNode propertyNode) {
         if (propertyNode.isArray()) {
@@ -95,7 +102,6 @@ public class DataModel {
         }
     }
 
-    // Getters and setters
 
     public String getName() {
         return name;
@@ -113,11 +119,11 @@ public class DataModel {
         this.api = api;
     }
 
-    public Object getDataModelConfig() {
+    public Object getDataModel() {
         return dataModel;
     }
 
-    public void setDataModelConfig(Object dataModel) {
+    public void setDataModel(Object dataModel) {
         this.dataModel = dataModel;
     }
 

@@ -1,6 +1,7 @@
 {
   "name": "Polygon-IO",
   "api": "https://api.polygon.io/v2/aggs/ticker/AAPL/range/1/day/2022-01-09/2023-01-09?apiKey=MEyaLaQQpHDCSp4ub_QHx6UseDlOnGqU",
+  "headers": [],
   "fetch_interval": 10,
   "restart_delay": 30,
   "schema": {

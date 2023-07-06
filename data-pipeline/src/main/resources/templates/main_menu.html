@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>API Page</title>
+</head>
+<body>
+    <input type="text" id="apiName" placeholder="Enter a value" />
+
+    <button type="button" onclick="startStream()">Stream</button>
+    <button type="button" onclick="fetchData()">Fetch</button>
+
+    <script th:inline="javascript">
+        function startStream() {
+            const apiName = document.getElementById("apiName").value;
+            sendRequest(apiName, '/api/v1/stream');
+        }
+
+        function fetchData() {
+            const apiName = document.getElementById("apiName").value;
+            sendRequest(apiName, '/api/v1/fetch');
+        }
+
+        function sendRequest(apiName, endpoint) {
+            fetch(endpoint + '?apiName=' + encodeURIComponent(apiName), {
+                method: 'POST'
+            })
+                .then(response => {
+                    if (response.ok) {
+                        console.log('Request sent successfully.');
+                    } else {
+                        console.error('Failed to send the request.');
+                    }
+                })
+                .catch(error => {
+                    console.error('An error occurred:', error);
+                });
+        }
+    </script>
+</body>
+</html>

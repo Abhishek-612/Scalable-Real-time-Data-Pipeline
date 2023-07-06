@@ -3,14 +3,18 @@ package com.pipeline.datapipeline.controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.pipeline.datapipeline.beans.DataModel;
 import com.pipeline.datapipeline.services.DataStreamerService;
+import com.pipeline.datapipeline.utils.Constants;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
+import org.apache.kafka.common.header.Header;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -20,15 +24,14 @@ import reactor.netty.http.client.HttpClient;
 
 import java.time.Duration;
 
-@Component
+@Controller
 public class ApiStreamController {
 
     private static final Logger LOGGER = LogManager.getLogger();
     private final DataStreamerService dataStreamerService;
     private final WebClient webClient;
-    private final int TIMEOUT_SECONDS = 10;
-    private final int BUFFER_LIMIT = 10 * 1024 * 1024;  // Set buffer limit to 10 MB
-    private Duration restartDelay = Duration.ofSeconds(30);
+
+    private Duration restartDelay = Duration.ofSeconds(Constants.DEFAULT_API_STREAM_RESTART_DELAY);
 
     @Autowired
     public ApiStreamController(DataStreamerService dataStreamerService, WebClient.Builder webClientBuilder) {
@@ -49,28 +52,27 @@ public class ApiStreamController {
 
     private Mono<JsonNode> fetchData(DataModel dataModel) {
         {
-            HttpClient httpClient = HttpClient.create().wiretap(true).responseTimeout(Duration.ofSeconds(TIMEOUT_SECONDS))
-                    .doOnConnected(conn -> conn.addHandlerLast(new ReadTimeoutHandler(TIMEOUT_SECONDS))
-                            .addHandlerLast(new WriteTimeoutHandler(TIMEOUT_SECONDS)))
+            HttpClient httpClient = HttpClient.create().wiretap(true).responseTimeout(Duration.ofSeconds(Constants.TIMEOUT_SECONDS))
+                    .doOnConnected(conn -> conn.addHandlerLast(new ReadTimeoutHandler(Constants.TIMEOUT_SECONDS))
+                            .addHandlerLast(new WriteTimeoutHandler(Constants.TIMEOUT_SECONDS)))
                     .tcpConfiguration(tcpClient -> tcpClient.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
-                            .doOnConnected(connection -> connection.addHandlerLast(new ReadTimeoutHandler(TIMEOUT_SECONDS))
-                                    .addHandlerLast(new WriteTimeoutHandler(TIMEOUT_SECONDS)))
+                            .doOnConnected(connection -> connection.addHandlerLast(new ReadTimeoutHandler(Constants.TIMEOUT_SECONDS))
+                                    .addHandlerLast(new WriteTimeoutHandler(Constants.TIMEOUT_SECONDS)))
                             .option(ChannelOption.SO_KEEPALIVE, true))
-                    .doOnConnected(conn -> conn.addHandlerLast(new ReadTimeoutHandler(TIMEOUT_SECONDS))
-                            .addHandlerLast(new WriteTimeoutHandler(TIMEOUT_SECONDS)));
+                    .doOnConnected(conn -> conn.addHandlerLast(new ReadTimeoutHandler(Constants.TIMEOUT_SECONDS))
+                            .addHandlerLast(new WriteTimeoutHandler(Constants.TIMEOUT_SECONDS)));
 
             WebClient.Builder webClientBuilder = WebClient.builder()
                     .baseUrl(dataModel.getApi())
                     .clientConnector(new ReactorClientHttpConnector(httpClient))
                     .exchangeStrategies(ExchangeStrategies.builder()
-                            .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(BUFFER_LIMIT))
+                            .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(Constants.BUFFER_LIMIT))
                             .build());
 
             return webClientBuilder.build()
                     .get()
                     .uri(dataModel.getApi())
-                    .header("X-RapidAPI-Host", "twelve-data1.p.rapidapi.com")
-                    .header("X-RapidAPI-Key", "9a15fa944dmsh3b965dab06fa0cfp1e0460jsnaac0d5930b98")
+                    .headers(headers -> headers.addAll(dataModel.getHttpHeaders()))
                     .retrieve()
                     .bodyToMono(JsonNode.class);
         }

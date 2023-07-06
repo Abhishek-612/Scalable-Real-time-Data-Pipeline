@@ -1,12 +1,15 @@
-package com.pipeline.datapipeline;
+package com.pipeline.datapipeline.utils;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.pipeline.datapipeline.beans.DataModel;
+import org.apache.kafka.common.header.Header;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -21,6 +24,7 @@ import java.util.Map;
 public class DataModelLoader {
 
     private final Logger LOGGER = LogManager.getLogger();
+    private final HashMap<String, DataModel> listOfDataModels = new HashMap<>();
 
     @Value("${data-models-directory}")
     private String DATA_MODELS_DIRECTORY;
@@ -31,9 +35,12 @@ public class DataModelLoader {
         this.objectMapper = new ObjectMapper();
     }
 
-    public List<DataModel> loadAndParseDataModels() {
+    public DataModel getDataModelByName(String apiName) {
+        return this.listOfDataModels.getOrDefault(apiName, null);
+    }
+
+    public void loadAndParseDataModels() {
         File dataModelDirectory = new File(DATA_MODELS_DIRECTORY);
-        List<DataModel> listOfDataModels = new ArrayList<>();
 
         if (dataModelDirectory.exists() && dataModelDirectory.isDirectory()) {
             File[] dataModelFiles = dataModelDirectory.listFiles();
@@ -45,7 +52,7 @@ public class DataModelLoader {
                         System.out.println(dataModelNode);
 
                         // Process the data model definition as needed
-                        listOfDataModels.add(parseDataModel(dataModelNode));
+                        listOfDataModels.put(dataModelNode.get("name").asText(), parseDataModel(dataModelNode));
                     } catch (IOException e) {
                         LOGGER.error("Failed to parse data model definition file: " + dataModelFile.getName());
                         e.printStackTrace();
@@ -53,21 +60,29 @@ public class DataModelLoader {
                 }
             }
         }
-        return listOfDataModels;
     }
 
     private DataModel parseDataModel(JsonNode dataModelNode) {
-        System.out.println(DATA_MODELS_DIRECTORY);
         // Extract base configuration
         String name = dataModelNode.get("name").asText();
-        System.out.println(DATA_MODELS_DIRECTORY);
         String api = dataModelNode.get("api").asText();
+        Integer fetchInteval = dataModelNode.get("fetch_interval").asInt(Constants.DEFAULT_API_STREAM_FETCH_INTERVAL);
+        Integer restartDelay = dataModelNode.get("restart_delay").asInt(Constants.DEFAULT_API_STREAM_RESTART_DELAY);
+
+        // Extract headers information
+        JsonNode headersNode = dataModelNode.get("headers");
+        HttpHeaders httpHeaders = new HttpHeaders();
+        for (JsonNode headerNode : headersNode) {
+            String headerName = headerNode.get("name").asText();
+            String headerValue = headerNode.get("value").asText();
+            httpHeaders.add(headerName, headerValue);
+        }
 
         // Extract schema information
         JsonNode dataModelConfig = dataModelNode.get("schema");
 
         // Create the DataModel object with the extracted information
-        return new DataModel(name, api, dataModelConfig);
+        return new DataModel(name, api, httpHeaders, fetchInteval, restartDelay, dataModelConfig);
     }
 
 }

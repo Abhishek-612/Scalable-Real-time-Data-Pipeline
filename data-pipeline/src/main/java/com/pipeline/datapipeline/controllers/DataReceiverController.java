@@ -20,7 +20,7 @@ public class DataReceiverController {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public void startStreamController() {
+    public void startReceiverController() {
 
 
         Thread receiverThread = new Thread(() -> {

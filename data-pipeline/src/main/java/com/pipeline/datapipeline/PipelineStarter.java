@@ -3,6 +3,7 @@ package com.pipeline.datapipeline;
 import com.pipeline.datapipeline.beans.DataModel;
 import com.pipeline.datapipeline.controllers.ApiStreamController;
 import com.pipeline.datapipeline.controllers.DataReceiverController;
+import com.pipeline.datapipeline.utils.Constants;
 import com.pipeline.datapipeline.utils.DataModelLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,7 +38,7 @@ public class PipelineStarter implements DisposableBean {
         // Create a thread pool with an adjustable thread pool size
         int corePoolSize = Runtime.getRuntime().availableProcessors(); // Use the number of available CPU cores as the initial pool size
         int maximumPoolSize = corePoolSize * 2; // Set the maximum pool size based on desired concurrency level
-        long keepAliveTime = 60; // Keep idle threads alive for 60 seconds
+        long keepAliveTime = Constants.THREAD_ALIVE_TIME; // Keep idle threads alive for 60 seconds
         this.executorService = new ThreadPoolExecutor(
                 corePoolSize,
                 maximumPoolSize,

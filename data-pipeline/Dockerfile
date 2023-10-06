@@ -13,4 +13,4 @@ RUN chmod 777 -R *
 
 
 # Set the entry point command to run the Spring Boot application
-CMD ["sh", "-c", "java -jar data-pipe.jar stream"]
+CMD ["sh", "-c", "java -jar data-pipe.jar"]

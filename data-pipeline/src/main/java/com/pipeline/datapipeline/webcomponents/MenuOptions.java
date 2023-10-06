@@ -16,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 @RequestMapping("/api/v1")
 public class MenuOptions {
 
+    private static final Logger LOGGER = LogManager.getLogger();
     private final RestTemplate restTemplate;
     private final String pipelineBaseUrl;
 
@@ -25,7 +26,7 @@ public class MenuOptions {
         this.pipelineBaseUrl = pipelineBaseUrl;
     }
 
-    @GetMapping
+    @GetMapping("/")
     public String getMenuOptions() {
         return "main_menu";
     }

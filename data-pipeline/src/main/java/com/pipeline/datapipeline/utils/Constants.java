@@ -8,6 +8,8 @@ public class Constants {
     private static final Logger LOGGER = LogManager.getLogger();
 
 
+    public static final int THREAD_ALIVE_TIME = 60;
+
     // API Streaming Default Constants
     public static final int TIMEOUT_SECONDS = 10;
     public static final int BUFFER_LIMIT = 10 * 1024 * 1024;  // Set buffer limit to 10 MB

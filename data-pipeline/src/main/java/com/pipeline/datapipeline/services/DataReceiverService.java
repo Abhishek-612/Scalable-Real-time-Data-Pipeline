@@ -1,6 +1,9 @@
 package com.pipeline.datapipeline.services;
 
+import com.pipeline.datapipeline.dao.DatabaseService;
+import com.pipeline.datapipeline.dao.databases.DatabaseSource;
 import com.pipeline.datapipeline.utils.Constants;
+import com.pipeline.datapipeline.utils.DBQueryResolver;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -20,6 +23,7 @@ import org.springframework.stereotype.Service;
 public class DataReceiverService {
     private boolean running;
     private Consumer<String, Object> consumer = null;
+    private DatabaseSource db = null;
 
     @Value("${kafka.consumer.group-id}")
     private String KAFKA_CONSUMER_GROUP_ID;
@@ -48,11 +52,26 @@ public class DataReceiverService {
         LOGGER.info("Kafka Connection Established!");
     }
 
+    private void databaseInit() {
+        if (db == null)
+            db = DatabaseService.getDatabase(Constants.MONGODB);
+
+        if (!db.checkConnection()) {
+            try {
+                db.openConnection();
+            } catch (Exception e) {
+                LOGGER.error("Database could not be connected!");
+            }
+        } else {
+            LOGGER.info("Database already connected!");
+        }
+    }
+
     public void start() {
         // Initialize necessary resources
         // Connect to external systems, set up data sources, etc.
-//        BOOTSTRAP_SERVERS = Constants.serverAddress;
         kafkaInit();
+        databaseInit();
 
         // Start receiving data
         running = true;
@@ -77,14 +96,29 @@ public class DataReceiverService {
 
     private void receiveData() {
         String TOPIC = "data-topic";
+        String resolvedQuery = null;
 
         try {
             consumer.subscribe(Collections.singleton(TOPIC));
             while (true) {
+                long startTime = System.currentTimeMillis();
+
                 ConsumerRecords<String, Object> records = consumer.poll(Duration.ofMillis(10));
                 for (ConsumerRecord<String, Object> record : records) {
                     Object data = record.value();
                     LOGGER.info("Received data: " + data.toString());
+
+                    while (!db.checkConnection()) {
+                        if (System.currentTimeMillis() - startTime > Constants.DATABASE_TIMEOUT) {
+                            LOGGER.error("Database connection timeout");
+                            break;
+                        }
+                        databaseInit();
+                    }
+
+                    Object dataEntry = process(data);
+                    resolvedQuery = DBQueryResolver.getQuery(Constants.MONGODB, Constants.INSERT, data);
+                    db.executeQuery(resolvedQuery);
                 }
                 consumer.commitSync(); // Commit the offsets to mark the messages as processed
             }
@@ -93,9 +127,13 @@ public class DataReceiverService {
         }
     }
 
-//    private void process(Data data) {
-//        // Implement the logic to process the received data
-//        // Apply any necessary transformations, validations, or other processing operations
-//        // Pass the processed data to the appropriate components for further processing or storage
-//    }
+    private Object process(Object data) {
+        // Implement the logic to process the received data
+        // Apply any necessary transformations, validations, or other processing operations
+        // Pass the processed data to the appropriate components for further processing or storage
+
+        Object dataEntry = null;
+
+        return dataEntry;
+    }
 }

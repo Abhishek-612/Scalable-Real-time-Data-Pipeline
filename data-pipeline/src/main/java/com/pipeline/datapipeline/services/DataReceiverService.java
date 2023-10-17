@@ -4,6 +4,8 @@ import com.pipeline.datapipeline.dao.DatabaseService;
 import com.pipeline.datapipeline.dao.databases.DatabaseSource;
 import com.pipeline.datapipeline.utils.Constants;
 import com.pipeline.datapipeline.utils.DBQueryResolver;
+import com.pipeline.datapipeline.utils.DataBeanGenerator;
+import com.pipeline.datapipeline.utils.StringManipulation;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -95,7 +97,7 @@ public class DataReceiverService {
     }
 
     private void receiveData() {
-        String TOPIC = "data-topic";
+        String TOPIC = "Polygon-IO";
         String resolvedQuery = null;
 
         try {
@@ -104,6 +106,8 @@ public class DataReceiverService {
                 long startTime = System.currentTimeMillis();
 
                 ConsumerRecords<String, Object> records = consumer.poll(Duration.ofMillis(10));
+                LOGGER.info("Records fetched: " + records.count());
+
                 for (ConsumerRecord<String, Object> record : records) {
                     Object data = record.value();
                     LOGGER.info("Received data: " + data.toString());
@@ -116,9 +120,13 @@ public class DataReceiverService {
                         databaseInit();
                     }
 
-                    Object dataEntry = process(data);
-                    resolvedQuery = DBQueryResolver.getQuery(Constants.MONGODB, Constants.INSERT, data);
-                    db.executeQuery(resolvedQuery);
+                    Object dataEntry = process(data, TOPIC);
+                    if (dataEntry != null) {
+                        LOGGER.info(dataEntry.toString());
+                        resolvedQuery = DBQueryResolver.getQuery(Constants.MONGODB, Constants.INSERT, data);
+                    }
+                    LOGGER.info("Resolved Query: " + resolvedQuery);
+//                    db.executeQuery(resolvedQuery);
                 }
                 consumer.commitSync(); // Commit the offsets to mark the messages as processed
             }
@@ -127,13 +135,16 @@ public class DataReceiverService {
         }
     }
 
-    private Object process(Object data) {
-        // Implement the logic to process the received data
-        // Apply any necessary transformations, validations, or other processing operations
-        // Pass the processed data to the appropriate components for further processing or storage
+    private Object process(Object data, String dataTopic) {
+        /* - Process the received data
+           - Apply any necessary transformations, validations, or other processing operations
+           - Pass the processed data to the appropriate components for further processing or storage */
 
         Object dataEntry = null;
+        dataEntry = DataBeanGenerator.buildDataEntryObject(StringManipulation.toCamelCase(dataTopic));
+        // TODO: Populate `dataEntry` with Setters
 
+        LOGGER.info(dataEntry.toString());
         return dataEntry;
     }
 }

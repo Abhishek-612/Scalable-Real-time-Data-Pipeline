@@ -20,6 +20,11 @@ public class Constants {
     // Data Object Configurations
     public static final String JSON = "JSON";
 
+    // JavaPoet Builder
+    public static final String BUILDER_VARIABLE = "builder";
+    public static final String BUILDER_ROOT = "DataBeanBuilder";
+
+
 
     // Databases
     public static final int DATABASE_TIMEOUT = 5000; // 5 seconds

@@ -2,9 +2,8 @@ package com.pipeline.datapipeline.beans;
 
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.apache.kafka.common.header.Header;
+import com.squareup.javapoet.MethodSpec;
 import org.springframework.http.HttpHeaders;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,14 +20,17 @@ public class DataModel {
     private JsonNode schema;
     private Object dataModel;
 
+    private List<MethodSpec> getterSetterMethods;
 
-    public DataModel(String name, String api, HttpHeaders httpHeaders, int fetchInterval, int restartDelay, JsonNode schema) {
+
+    public DataModel(String name, String api, HttpHeaders httpHeaders, int fetchInterval, int restartDelay, JsonNode schema, List<MethodSpec> getterSetterMethods) {
         this.name = name;
         this.api = api;
         this.httpHeaders = httpHeaders;
         this.fetchInterval = fetchInterval;
         this.restartDelay = restartDelay;
         this.schema = schema;
+        this.getterSetterMethods = getterSetterMethods;
         this.dataModel = extractSchemaInfo(this.schema);
     }
 
@@ -133,5 +135,13 @@ public class DataModel {
 
     public void setSchema(JsonNode schema) {
         this.schema = schema;
+    }
+
+    public List<MethodSpec> getGetterSetterMethods() {
+        return getterSetterMethods;
+    }
+
+    public void setGetterSetterMethods(List<MethodSpec> getterSetterMethods) {
+        this.getterSetterMethods = getterSetterMethods;
     }
 }

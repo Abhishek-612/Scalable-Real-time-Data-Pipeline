@@ -1,23 +1,19 @@
 package com.pipeline.datapipeline.utils;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.pipeline.datapipeline.beans.DataModel;
-import org.apache.kafka.common.header.Header;
+import com.squareup.javapoet.MethodSpec;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 @Component
@@ -81,8 +77,16 @@ public class DataModelLoader {
         // Extract schema information
         JsonNode dataModelConfig = dataModelNode.get("schema");
 
+        List<MethodSpec> getterSetterMethods = null;
+        try {
+            getterSetterMethods = DataBeanGenerator.generateBeanClass(dataModelConfig, StringManipulation.toCamelCase(name));
+        } catch (IOException e) {
+            LOGGER.error("Error creating DataBean class.");
+            e.printStackTrace();
+        }
+
         // Create the DataModel object with the extracted information
-        return new DataModel(name, api, httpHeaders, fetchInteval, restartDelay, dataModelConfig);
+        return new DataModel(name, api, httpHeaders, fetchInteval, restartDelay, dataModelConfig, getterSetterMethods);
     }
 
 }

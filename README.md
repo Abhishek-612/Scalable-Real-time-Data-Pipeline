@@ -3,7 +3,7 @@
 
 The system design document clearly specifies the flow and purpose of this project.
 
-Currently based on Java, but I am considering porting to Python due to its versatility and more features in visualizing and dynamic configuration. The repository is currently private and will be made public as soon as the migration completes.
+**Note-** Currently based on Java, but I am considering porting to Python due to its versatility and more features in visualizing and dynamic configuration. The repository is currently private and will be made public as soon as the migration completes.
 
 Technology Stack:
 - Java (Spring Boot)
